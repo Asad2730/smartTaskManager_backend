@@ -1,0 +1,17 @@
+.git
+.gitignore
+node_modules
+npm-debug.log
+Dockerfile
+.dockerignore
+.env
+logs
+*.tar.gz
+*.zip
+dist
+build
+coverage
+.nyc_output
+.vscode
+.idea
+*.tsbuildinfo

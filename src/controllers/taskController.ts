@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import { AppError } from "../utils/error";
 import { taskSchema } from "../validators/taskValidator";
-import { createtaskService, deleteTaskService, getTaskService, updateTaskService } from "../services/taskService";
+import { createtaskService, deleteTaskService, getTaskService, logTimeService, updateTaskService } from "../services/taskService";
 import type { AuthRequest } from "../middlewares/authMiddleware";
 
 
@@ -23,7 +23,7 @@ export const getTasks = async (req: AuthRequest, res: Response) => {
         if (!req.user?.id) {
             return res.status(401).json({ message: "Unauthorized", success: false });
         }
-        const tasks = await getTaskService(req.user.id)
+        const tasks = await getTaskService(req, req.query)
         res.status(200).json({ tasks, success: true })
     } catch (err) {
         const status = err instanceof AppError ? err.statusCode : 500;
@@ -59,6 +59,29 @@ export const deleteTask = async (req: AuthRequest, res: Response) => {
         }
         const message = await deleteTaskService(req.params.id, req.user!.id)
         res.status(200).json({ message, success: true })
+    } catch (err) {
+        const status = err instanceof AppError ? err.statusCode : 500;
+        res.status(status).json({ message: err, success: false })
+    }
+}
+
+
+
+export const logTime = async (req: AuthRequest, res: Response) => {
+    try {
+        if (!req.user?.id) {
+            return res.status(401).json({ message: "Unauthorized", success: false });
+        }
+        if (!req.params.id) {
+            return res.status(400).json({ message: "Task ID is required", success: false });
+        }
+        const { time } = req.body;
+        if (!time || time <= 0) {
+            return res.status(400).json({ message: "Time must be greater than 0", success: false });
+        }
+
+        const task = await logTimeService(req.params.id, req.user?.id, time)
+        res.status(200).json({ message: "Time logged successfully", task });
     } catch (err) {
         const status = err instanceof AppError ? err.statusCode : 500;
         res.status(status).json({ message: err, success: false })

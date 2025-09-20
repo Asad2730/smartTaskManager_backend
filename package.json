@@ -4,7 +4,12 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "start": "bun --watch run src/index.ts"
+    "dev": "bun --watch run src/index.ts",
+    "start": "bun run src/index.ts",
+    "docker:build": "docker build -t smart-task-manager .",
+    "docker:run": "docker run -p 4000:4000 --env-file .env smart-task-manager",
+    "docker:compose": "docker-compose up",
+    "docker:compose:build": "docker-compose up --build"
   },
   "devDependencies": {
     "@types/bcryptjs": "^3.0.0",
