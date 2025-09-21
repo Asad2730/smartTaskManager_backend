@@ -7,16 +7,16 @@ import type { Types } from "mongoose";
 
 
 export const registerService = async (user: Pick<IUser, 'email' | 'password'>): Promise<IUser> => {
-    const existingUser = await User.findOne({ email: user.email }).select('email');
+    const existingUser = await User.findOne({ email: user.email.toLowerCase() }).select('email');
     if (existingUser) throw new AppError("User already exists", 400);
     const hashedPassword = await bcrypt.hash(user.password, 10);
-    return await User.create({ email: user.email, password: hashedPassword });
+    return await User.create({ email: user.email.toLowerCase(), password: hashedPassword });
 };
 
 
 export const loginService = async (user: Pick<IUser, 'email' | 'password'>): Promise<string> => {
 
-    const userFound = await User.findOne({ email: user.email })
+    const userFound = await User.findOne({ email: user.email.toLowerCase() })
     if (!userFound) throw new AppError(`Invalid Credentials`, 401)
     const isMatch = await bcrypt.compare(user.password, userFound.password)
     if (!isMatch) throw new AppError(`Invalid Credentials`, 401)
