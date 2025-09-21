@@ -5,11 +5,11 @@ import { createtaskService, deleteTaskService, getTaskService, logTimeService, u
 import type { AuthRequest } from "../middlewares/authMiddleware";
 
 
-export const createTask = async (req: Request, res: Response) => {
+export const createTask = async (req: AuthRequest, res: Response) => {
     try {
         const { error } = taskSchema.validate(req.body)
         if (error) return res.status(404).json({ message: error.details[0]?.message, success: false })
-        const task = await createtaskService(req.body)
+        const task = await createtaskService({ ...req.body, user: req.user!.id })
         res.status(201).json({ task, success: true })
     } catch (err) {
         const status = err instanceof AppError ? err.statusCode : 500;
@@ -20,10 +20,13 @@ export const createTask = async (req: Request, res: Response) => {
 
 export const getTasks = async (req: AuthRequest, res: Response) => {
     try {
-        if (!req.user?.id) {
-            return res.status(401).json({ message: "Unauthorized", success: false });
+        let userId: string;
+        if (req.headers['x-internal-request'] === 'true' && req.headers['x-user-id']) {
+            userId = req.headers['x-user-id'] as string;
+        } else {
+            userId = req.user!.id;
         }
-        const tasks = await getTaskService(req, req.query)
+        const tasks = await getTaskService(userId, req.query,)
         res.status(200).json({ tasks, success: true })
     } catch (err) {
         const status = err instanceof AppError ? err.statusCode : 500;
@@ -34,9 +37,7 @@ export const getTasks = async (req: AuthRequest, res: Response) => {
 
 export const updateTask = async (req: AuthRequest, res: Response) => {
     try {
-        if (!req.user?.id) {
-            return res.status(401).json({ message: "Unauthorized", success: false });
-        }
+
         if (!req.params.id) {
             return res.status(400).json({ message: "Task ID is required", success: false });
         }
@@ -51,9 +52,7 @@ export const updateTask = async (req: AuthRequest, res: Response) => {
 
 export const deleteTask = async (req: AuthRequest, res: Response) => {
     try {
-        if (!req.user?.id) {
-            return res.status(401).json({ message: "Unauthorized", success: false });
-        }
+
         if (!req.params.id) {
             return res.status(400).json({ message: "Task ID is required", success: false });
         }
@@ -69,9 +68,7 @@ export const deleteTask = async (req: AuthRequest, res: Response) => {
 
 export const logTime = async (req: AuthRequest, res: Response) => {
     try {
-        if (!req.user?.id) {
-            return res.status(401).json({ message: "Unauthorized", success: false });
-        }
+
         if (!req.params.id) {
             return res.status(400).json({ message: "Task ID is required", success: false });
         }
@@ -80,7 +77,7 @@ export const logTime = async (req: AuthRequest, res: Response) => {
             return res.status(400).json({ message: "Time must be greater than 0", success: false });
         }
 
-        const task = await logTimeService(req.params.id, req.user?.id, time)
+        const task = await logTimeService(req.params.id, req.user!.id, time)
         res.status(200).json({ message: "Time logged successfully", task });
     } catch (err) {
         const status = err instanceof AppError ? err.statusCode : 500;

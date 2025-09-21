@@ -4,8 +4,6 @@ import Task from "../models/task";
 import User from "../models/user";
 import { AppError } from "../utils/error";
 import type QueryString from "qs";
-import type { AuthRequest } from "../middlewares/authMiddleware";
-
 
 export const createtaskService = async (task: Pick<ITask, 'title' | 'description' | 'dueDate' | 'status' | 'user'>): Promise<ITask> => {
 
@@ -28,10 +26,10 @@ export const createtaskService = async (task: Pick<ITask, 'title' | 'description
 }
 
 
-export const getTaskService = async (req: AuthRequest, requestQuery: QueryString.ParsedQs): Promise<ITask[]> => {
+export const getTaskService = async (userId:string, requestQuery: QueryString.ParsedQs): Promise<ITask[]> => {
 
     const { status, sortBy } = requestQuery;
-    let query: any = { user: req.user?.id };
+    let query: any = { user: userId };
     if (status) query.status = status;
     let sort: any = { createdAt: -1 };
     if (sortBy === "dueDate") sort = { dueDate: 1 };

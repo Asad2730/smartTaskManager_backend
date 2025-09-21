@@ -6,10 +6,7 @@ import { getSubscriptionStatusService, upgradeToPremiumService } from "../servic
 
 export const upgradeToPremium = async (req: AuthRequest, res: Response) => {
     try {
-        if (!req.user?.id) {
-            return res.status(401).json({ message: "Unauthorized", success: false });
-        }
-        const user = await upgradeToPremiumService(req.user.id)
+        const user = await upgradeToPremiumService(req.user!.id)
         res.status(200).json({ message: 'Upgraded to Premium', user, success: true })
     } catch (err) {
         const status = err instanceof AppError ? err.statusCode : 500;
@@ -20,12 +17,7 @@ export const upgradeToPremium = async (req: AuthRequest, res: Response) => {
 
 export const getSubscriptionStatus = async (req: AuthRequest, res: Response) => {
     try {
-
-        if (!req.user?.id) {
-            return res.status(401).json({ message: "Unauthorized", success: false });
-        }
-
-        const subscription = await getSubscriptionStatusService(req.user.id)
+        const subscription = await getSubscriptionStatusService(req.user!.id)
         if (!subscription) {
             return res.status(200).json({
                 plan: 'free',

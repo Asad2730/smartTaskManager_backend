@@ -2,51 +2,70 @@ services:
   app:
     build: .
     ports:
-      - "4000:4000"
+      - "4000:4000"  # Main backend API
     environment:
       - NODE_ENV=production
       - PORT=4000
-      - MONGO_URI=mongodb://mongo:27017/smart-task-manager
+      - MONGO_URI=mongodb://mongo:27017/smart-task-manager 
       - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key-change-in-production}
+      - AI_SERVER_URL=http://mcp-server:8080  
     depends_on:
-      - mongo
+      - mongo  # Wait for MongoDB to start first
     restart: unless-stopped
     volumes:
-      - ./logs:/app/logs
+      - ./logs:/app/logs  
     networks:
       - app-network
 
   mongo:
     image: mongo:6-jammy
     ports:
-      - "27017:27017"
+      - "27017:27017"  # MongoDB port for external tools
     environment:
       - MONGO_INITDB_DATABASE=smart-task-manager
     volumes:
-      - mongo_data:/data/db
-      - ./init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+      - mongo_data:/data/db  # Persist database data
+      - ./init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro 
     restart: unless-stopped
     networks:
       - app-network
 
-  # MCP Server (we'll set this up in step 3)
-  mcp-server:
+  mcp-server:  
     build:
-      context: ./mcp-server
+      context: ./mcp-server  # AI server build context
       dockerfile: Dockerfile
     ports:
-      - "8080:8080"
+      - "8080:8080"  
     environment:
-      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}  
+      - PORT=8080
+      - MAIN_APP_URL=http://app:4000  # Main app connection for data
     depends_on:
-      - app
+      - app  
     restart: unless-stopped
     networks:
       - app-network
 
+  # MongoDB Web GUI
+  mongo-express:
+    image: mongo-express
+    ports:  
+       - "8081:8081" 
+    environment:
+      - ME_CONFIG_MONGODB_SERVER=mongo  
+      - ME_CONFIG_MONGODB_PORT=27017
+      - ME_CONFIG_BASICAUTH_USERNAME=admin  # Login credentials
+      - ME_CONFIG_BASICAUTH_PASSWORD=pass
+    depends_on:
+      - mongo  
+    networks:
+      - app-network 
+
+# Persistent volume for MongoDB data
 volumes:
   mongo_data:
 
+# Internal network for container communication
 networks:
   app-network:
     driver: bridge

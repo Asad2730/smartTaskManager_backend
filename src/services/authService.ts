@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import type { IUser } from "../models/user";
 import User from "../models/user";
 import { AppError } from "../utils/error";
+import type { Types } from "mongoose";
 
 
 export const registerService = async (user: Pick<IUser, 'email' | 'password'>): Promise<IUser> => {
@@ -19,7 +20,7 @@ export const loginService = async (user: Pick<IUser, 'email' | 'password'>): Pro
     if (!userFound) throw new AppError(`Invalid Credentials`, 401)
     const isMatch = await bcrypt.compare(user.password, userFound.password)
     if (!isMatch) throw new AppError(`Invalid Credentials`, 401)
-    const userObj = { id: userFound._id, email: userFound.email, role: userFound.role }
+    const userObj = { id: (userFound._id as Types.ObjectId).toString(), email: userFound.email, role: userFound.role }
     return jwt.sign(userObj, process.env.JWT_SECRET as string,
         { expiresIn: '1d' })
 }

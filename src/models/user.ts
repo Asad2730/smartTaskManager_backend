@@ -1,11 +1,13 @@
-import { Schema, Document, model,Types } from 'mongoose'
+import { Schema, Document, model, Types } from 'mongoose'
 
 
 export interface IUser extends Document {
     email: string;
     password: string;
     role: 'free' | 'premium';
-    subscription:Types.ObjectId;
+    subscription: Types.ObjectId;
+    name?: string;
+    avatar?: string;
 }
 
 
@@ -14,12 +16,14 @@ const userSchema = new Schema<IUser>(
         email: { type: String, required: true, unique: true },
         password: { type: String, required: true },
         role: { type: String, enum: ['free', 'premium'], default: 'free' },
-        subscription : {type:Schema.Types.ObjectId, ref:'Subscription'}
+        subscription: { type: Schema.Types.ObjectId, ref: 'Subscription' },
+         name: { type: String },
+        avatar: { type: String }
     },
     { timestamps: true }
 );
 
 
-const User = model<IUser>('User',userSchema)
+const User = model<IUser>('User', userSchema)
 
 export default User

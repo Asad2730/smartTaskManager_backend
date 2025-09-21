@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "bun --watch run src/index.ts",
     "start": "bun run src/index.ts",
+     "test": "NODE_ENV=test bun test test/app.test.ts",
+    "test:watch": "NODE_ENV=test bun test --watch test/app.test.ts",
     "docker:build": "docker build -t smart-task-manager .",
     "docker:run": "docker run -p 4000:4000 --env-file .env smart-task-manager",
     "docker:compose": "docker-compose up",
@@ -16,13 +18,17 @@
     "@types/bun": "latest",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
+    "@types/jest": "^30.0.0",
     "@types/jsonwebtoken": "^9.0.10",
-    "@types/mongoose": "^5.11.97"
+    "@types/mongoose": "^5.11.97",
+    "@types/supertest": "^6.0.3",
+    "supertest": "^7.1.4"
   },
   "peerDependencies": {
     "typescript": "^5"
   },
   "dependencies": {
+    "axios": "^1.12.2",
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
     "dotenv": "^17.2.2",
