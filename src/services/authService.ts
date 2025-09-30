@@ -15,7 +15,7 @@ export const registerService = async (user: Pick<IUser, 'email' | 'password'>): 
 
 
 export const loginService = async (user: Pick<IUser, 'email' | 'password'>): Promise<string> => {
-
+    
     const userFound = await User.findOne({ email: user.email.toLowerCase() })
     if (!userFound) throw new AppError(`Invalid Credentials`, 401)
     const isMatch = await bcrypt.compare(user.password, userFound.password)
